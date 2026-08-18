@@ -1,4 +1,4 @@
-import Class from "../Models/Class.js";
+import Class from "../Models/class.js";
 
 
 
