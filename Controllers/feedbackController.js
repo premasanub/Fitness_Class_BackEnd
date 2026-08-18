@@ -1,5 +1,5 @@
-import Feedback from "../Models/Feedback.js";
-import Booking from "../Models/Booking.js";
+import Feedback from "../Models/feedback.js";
+import Booking from "../Models/booking.js";
 
 export const createFeedback = async (req, res) => {
   try {

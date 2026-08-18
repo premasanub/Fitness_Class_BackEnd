@@ -1,4 +1,4 @@
-import Booking from "../Models/Booking.js";
+import Booking from "../Models/booking.js";
 import Class from "../Models/Class.js";
 
 // Create Booking
