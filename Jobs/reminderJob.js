@@ -1,6 +1,6 @@
 import cron from "node-cron";
 import Booking from "../Models/booking.js";
-import sendReminderEmail from "../utils/sendReminderEmail.js";
+import sendReminderEmail from "../Utils/sendReminderEmail.js";
 
 const reminderJob = () => {
 
