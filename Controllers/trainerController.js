@@ -11,20 +11,27 @@ import Feedback from "../Models/feedback.js";
 
 export const getAllTrainers = async (req, res) => {
   try {
+    console.log("GET ALL TRAINERS API CALLED");
+
     const trainers = await User.find({
       role: "trainer",
     }).select("-password");
+
+    console.log("TRAINERS:", trainers);
 
     res.status(200).json({
       success: true,
       trainers,
     });
+
   } catch (error) {
-    console.log("Get All Trainers Error:", error);
+
+    console.error("GET ALL TRAINERS ERROR:", error);
 
     res.status(500).json({
       success: false,
       message: error.message,
+      error: error.stack,
     });
   }
 };
