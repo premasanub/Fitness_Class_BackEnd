@@ -18,7 +18,7 @@ import {
   deleteTrainerSchedule,
 } from "../Controllers/trainerController.js";
 
-import upload from "../config/multer.js";
+import upload from "../Config/Multer.js";
 
 const router = express.Router();
 
