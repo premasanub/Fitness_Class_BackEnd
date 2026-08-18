@@ -32,9 +32,30 @@ const bookingSchema = new mongoose.Schema(
     },
 
     bookingStatus: {
-      type: String,
-      enum: ["Pending", "Confirmed", "Cancelled", "Completed"],
-      default: "Pending",
+  type: String,
+  enum: ["Pending", "Confirmed", "Cancelled", "Completed"],
+  default: "Pending",
+},
+    paymentId: {
+  type: String,
+},
+
+orderId: {
+  type: String,
+},
+
+signature: {
+  type: String,
+},
+
+feedbackGiven: {
+  type: Boolean,
+  default: false,
+},
+
+reminderSent: {
+      type: Boolean,
+      default: false,
     },
   },
   {
@@ -42,4 +63,7 @@ const bookingSchema = new mongoose.Schema(
   }
 );
 
-export default mongoose.model("Booking", bookingSchema);
+const Booking = mongoose.models.Booking || mongoose.model("Booking", bookingSchema);
+export default Booking;
+
+

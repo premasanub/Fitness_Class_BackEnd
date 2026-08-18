@@ -7,7 +7,9 @@ import trainerRoutes from "./Routes/trainerRoutes.js";
 import classRoutes from "./Routes/classRoutes.js";
 import userRoutes from "./Routes/userRoutes.js";
 import bookingRoutes from "./Routes/bookingRoutes.js";
-
+import paymentRoutes from "./Routes/paymentRoutes.js";
+import feedbackRoutes from "./Routes/feedbackRoutes.js";
+import adminRoutes from "./Routes/adminRoutes.js";
 //dotenv config
 dotenv.config();
 
@@ -41,6 +43,9 @@ app.use("/api/user", userRoutes);
 app.use("/api/trainers", trainerRoutes);
 app.use("/api/classes", classRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/api/payment", paymentRoutes);
+app.use("/api/feedback", feedbackRoutes);
+app.use("/api/admin",adminRoutes);
 
 app.listen(port, () => {
     console.log("Server Started");

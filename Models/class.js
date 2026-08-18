@@ -23,6 +23,9 @@ const classSchema = new mongoose.Schema(
       required: true,
     },
 
+
+
+
     date: {
       type: String,
       required: true,
@@ -52,11 +55,23 @@ const classSchema = new mongoose.Schema(
       type: Number,
       default: 20,
     },
+
+
+    meetingLink: {
+    type: String,
+    default: "",
+  },
+// ⭐ Trainer provided slots
+    timeSlots: {
+      type: [String],
+      default: [],
+    },
+
   },
   {
     timestamps: true,
   }
 );
 
-const Class = mongoose.model("Class", classSchema);
+const Class = mongoose.models.Class || mongoose.model("Class", classSchema);
 export default Class;

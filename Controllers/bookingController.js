@@ -70,10 +70,17 @@ export const getMyBookings = async (req, res) => {
   }
 };
 
-// Cancel Booking
-export const cancelBooking = async (req, res) => {
+// Booking: change slot
+export const changeSlot = async (req, res) => {
   try {
-    const booking = await Booking.findById(req.params.id);
+
+    const { selectedSlot } = req.body;
+
+    const booking = await Booking.findByIdAndUpdate(
+      req.params.id,
+      { selectedSlot },
+      { new: true }
+    );
 
     if (!booking) {
       return res.status(404).json({
@@ -81,20 +88,33 @@ export const cancelBooking = async (req, res) => {
       });
     }
 
-    booking.bookingStatus = "Cancelled";
-    await booking.save();
+    res.json({
+      success: true,
+      message: "Time Slot Updated Successfully",
+      booking,
+    });
 
-    // Increase available seats
-    const fitnessClass = await Class.findById(booking.class);
+  } catch (error) {
+    res.status(500).json({
+      message: error.message,
+    });
+  }
+};
 
-    if (fitnessClass) {
-      fitnessClass.seats += 1;
-      await fitnessClass.save();
+export const getBookingById = async (req, res) => {
+  try {
+
+    const booking = await Booking.findById(req.params.id)
+      .populate("class")
+      .populate("trainer", "name email");
+
+    if (!booking) {
+      return res.status(404).json({
+        message: "Booking not found",
+      });
     }
 
-    res.status(200).json({
-      message: "Booking Cancelled Successfully",
-    });
+    res.json(booking);
 
   } catch (error) {
     res.status(500).json({

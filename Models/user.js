@@ -37,12 +37,14 @@ const userSchema = new mongoose.Schema(
     },
 
     age: {
-      type: Number,
-    },
+  type: Number,
+  default: null,
+},
 
-    gender: {
-      type: String,
-    },
+ gender: {
+  type: String,
+  default: "",
+},
 
     height: {
   type: String,
@@ -60,9 +62,10 @@ goal: {
 },
 
     profileImage: {
-      type: String,
-      default: "",
-    },
+  type: String,
+  default: "",
+
+},
 
 qualification: {
   type: String,
@@ -84,18 +87,18 @@ bio: {
   default: "",
 },
 
-meetingLink: {
-  type: String,
-  default: "",
-},
 
-availableSlots: [
-  {
-    day: String,
-    startTime: String,
-    endTime: String,
-  },
-],
+
+availableSlots: {
+  type: [
+    {
+      day: String,
+      startTime: String,
+      endTime: String,
+    },
+  ],
+  default: [],
+},
 
 rating: {
   type: Number,
@@ -107,12 +110,16 @@ totalReviews: {
   default: 0,
 },
 availableDays: {
-  type: String,
-  default: "",
+  type: [String],
+  default: [],
 },
 meetingLink: {
   type: String,
   default: "",
+},
+isActive: {
+  type: Boolean,
+  default: true,
 },
 
   },

@@ -3,16 +3,25 @@ import Class from "../Models/Class.js";
 
 
 // Get all classes
-export const getClasses = async (req, res) => {
-  try {
-    const classes = await Class.find().populate(
-      "trainer",
-      "name email"
-    );
 
-    res.status(200).json(classes);
+export const getAllClasses = async (req, res) => {
+  try {
+
+    const classes = await Class.find()
+      .populate("trainer", "name profileImage specialization")
+      .sort({ createdAt: -1 });
+
+    res.status(200).json({
+      success: true,
+      classes,
+    });
+
   } catch (error) {
+
+    console.log("Get All Classes Error:", error);
+
     res.status(500).json({
+      success: false,
       message: error.message,
     });
   }
@@ -21,25 +30,33 @@ export const getClasses = async (req, res) => {
 // Get single class
 export const getClassById = async (req, res) => {
   try {
-    const fitnessClass = await Class.findById(req.params.id).populate(
-      "trainer",
-      "name email"
-    );
+
+    const fitnessClass = await Class.findById(req.params.id)
+      .populate("trainer", "name email specialization");
 
     if (!fitnessClass) {
       return res.status(404).json({
+        success: false,
         message: "Class not found",
       });
     }
 
-    res.status(200).json(fitnessClass);
+    res.status(200).json({
+      success: true,
+      class: fitnessClass,
+    });
+
   } catch (error) {
+
+    console.log("GET CLASS BY ID ERROR:", error);
+
     res.status(500).json({
+      success: false,
       message: error.message,
     });
+
   }
 };
-
 // Create Class
 export const createClass = async (req, res) => {
   // Category Images
@@ -60,7 +77,7 @@ const image = categoryImages[category] || "fit.jpg";
 
 const newClass = await Class.create({
   ...req.body,
-  category, // lowercase save ஆகும்
+  category, // lowercase saved
   image,
 });
 

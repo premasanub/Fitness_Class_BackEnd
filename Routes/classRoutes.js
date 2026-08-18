@@ -1,7 +1,7 @@
 import express from "express";
 
 import {
-  getClasses,
+  getAllClasses,
   getClassById,
   createClass,
   updateClass,
@@ -10,9 +10,10 @@ import {
 
 const router = express.Router();
 
-router.get("/", getClasses);
+router.get("/", getAllClasses);
 
 router.get("/:id", getClassById);
+
 
 router.post("/", createClass);
 
