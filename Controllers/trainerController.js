@@ -1,4 +1,4 @@
-import User from "../models/user.js";
+import User from "../Models/user.js";
 import bcrypt from "bcrypt";
 
 import Booking from "../Models/booking.js";
