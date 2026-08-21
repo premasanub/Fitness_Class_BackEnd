@@ -122,3 +122,49 @@ export const getBookingById = async (req, res) => {
     });
   }
 };
+
+
+
+export const getUserDashboard = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    const totalBookings = await Booking.countDocuments({
+      user: userId,
+    });
+
+    const upcomingBookings = await Booking.countDocuments({
+      user: userId,
+      bookingStatus: {
+        $in: ["Pending", "Confirmed"],
+      },
+    });
+
+    const completedBookings = await Booking.countDocuments({
+      user: userId,
+      bookingStatus: "Completed",
+    });
+
+    const feedbackGiven = await Feedback.countDocuments({
+      user: userId,
+    });
+
+    res.status(200).json({
+      success: true,
+      stats: {
+        totalBookings,
+        upcomingBookings,
+        completedBookings,
+        feedbackGiven,
+      },
+    });
+
+  } catch (error) {
+    console.error("Dashboard Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};

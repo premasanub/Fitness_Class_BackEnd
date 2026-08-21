@@ -5,6 +5,7 @@ import {
   getMyBookings,
   getBookingById,
   changeSlot,
+   getUserDashboard,
 } from "../Controllers/bookingController.js";
 
 const router = express.Router();
@@ -16,5 +17,6 @@ router.get("/user/:userId", getMyBookings);
 
 router.get("/:id", getBookingById);
 router.put("/change-slot/:id", changeSlot);
+router.get("/dashboard/:userId", getUserDashboard);
 
 export default router;
