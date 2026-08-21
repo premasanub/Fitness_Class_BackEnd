@@ -35,28 +35,68 @@ export const login = async (req, res) => {
   try {
     const { email, password } = req.body;
 
+    // Find user
     const user = await User.findOne({ email });
+
     if (!user) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({
+        message: "Invalid credentials",
+      });
     }
 
-    const isPasswordValid = await bcrypt.compare(password, user.password);
+    // Check password
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      user.password
+    );
+
     if (!isPasswordValid) {
-      return res.status(401).json({ message: "Invalid credentials" });
+      return res.status(401).json({
+        message: "Invalid credentials",
+      });
     }
 
-    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
-      expiresIn: "1h",
-    });
+    // Generate token
+    const token = jwt.sign(
+      { _id: user._id },
+      process.env.JWT_SECRET,
+      {
+        expiresIn: "1h",
+      }
+    );
+
+    // Save token
     user.token = token;
     await user.save();
 
-    res
-      .status(200)
-      .json({ message: "Login successful", token: token, role: user.role });
+    // Send response
+    res.status(200).json({
+      message: "Login successful",
+      token: token,
+      role: user.role,
+
+      user: {
+        _id: user._id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        phone: user.phone,
+        address: user.address,
+        age: user.age,
+        gender: user.gender,
+        height: user.height,
+        weight: user.weight,
+        goal: user.goal,
+        profileImage: user.profileImage,
+      },
+    });
+
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error Error in login" });
+    console.error("Login error:", error);
+
+    res.status(500).json({
+      message: "Server error",
+    });
   }
 };
 
