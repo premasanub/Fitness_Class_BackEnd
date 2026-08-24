@@ -1,5 +1,6 @@
 import Booking from "../Models/booking.js";
 import Class from "../Models/class.js";
+import Feedback from "../Models/feedback.js";
 
 // Create Booking
 export const createBooking = async (req, res) => {
