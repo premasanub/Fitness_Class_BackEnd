@@ -66,11 +66,16 @@ const sendMail = async (to, subject, text) => {
     text: text,
   };
 
-  const info = await transporter.sendMail(mailData);
-
-  console.log("Mail sent successfully:", info.messageId);
-
-  return info;
+  await new Promise((resolve, reject) => {
+    transporter.sendMail(mailData, (err, info) => {
+      if (err) {
+        reject(err);
+      } else {
+        console.log("Mail Send Successfully")
+        resolve(info);
+      }
+    });
+  });
 };
 
 export default sendMail;
