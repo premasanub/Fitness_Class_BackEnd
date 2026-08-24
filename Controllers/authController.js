@@ -157,8 +157,11 @@ export const forgotPassword = async (req, res) => {
     console.log("3️⃣ Token created");
 
     const resetUrl =
-      `https://fitness-class-front-end-hb3y-ms914zjct-premas-projects.vercel.app` +
+      `https://fitness-class-front-end-hb3y.vercel.app/` +
       `/reset-password/${user._id}/${token}`;
+
+
+https://fitness-class-front-end-hb3y.vercel.app/
 
     console.log("4️⃣ Calling sendMail");
 
