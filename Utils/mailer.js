@@ -43,7 +43,7 @@
 
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
-import dns from "dns";
+// import dns from "dns";
 
 dotenv.config();
 
@@ -105,7 +105,7 @@ dotenv.config();
   });
 
   const mailData = {
-    from: process.env.PASS_MAIL,
+    from: process.env.MAIL_USER,
     to,
     subject,
     text,
