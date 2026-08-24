@@ -84,6 +84,93 @@ res.status(200).json({
   }
 };
 
+// // =====================================================
+// // USER DASHBOARD
+// // =====================================================
+
+// export const getUserDashboard = async (req, res) => {
+//   try {
+//     const userId = req.params.id;
+
+//     // Check user
+//     const user = await User.findOne({
+//       _id: userId,
+//       role: "user",
+//     }).select("-password");
+
+//     if (!user) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "User not found",
+//       });
+//     }
+
+//     // Get all bookings of this user
+//     const bookings = await Booking.find({
+//       user: userId,
+//     }).populate(
+//       "class",
+//       "title category description date time duration meetingLink"
+//     );
+
+//     // Total bookings
+//     const totalBookings = bookings.length;
+
+//     // Upcoming bookings
+//     const upcomingBookings = bookings.filter(
+//       (booking) =>
+//         booking.bookingStatus === "Confirmed" ||
+//         booking.bookingStatus === "Pending"
+//     );
+
+//     // Completed bookings
+//     const completedBookings = bookings.filter(
+//       (booking) =>
+//         booking.bookingStatus === "Completed"
+//     );
+
+//     // Feedback given by user
+//     const feedbacks = await Feedback.find({
+//       user: userId,
+//     });
+
+//     const feedbackGiven = feedbacks.length;
+
+//     res.status(200).json({
+//       success: true,
+
+//       user: {
+//         id: user._id,
+//         name: user.name,
+//         email: user.email,
+//         profileImage: user.profileImage,
+//       },
+
+//       stats: {
+//         totalBookings,
+//         upcoming: upcomingBookings.length,
+//         completed: completedBookings.length,
+//         feedbackGiven,
+//       },
+
+//       upcomingBookings,
+
+//     });
+
+//   } catch (error) {
+//     console.log(
+//       "User Dashboard Error:",
+//       error
+//     );
+
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
+
 // =====================================================
 // USER DASHBOARD
 // =====================================================
@@ -92,7 +179,10 @@ export const getUserDashboard = async (req, res) => {
   try {
     const userId = req.params.id;
 
-    // Check user
+    // ==========================================
+    // CHECK USER
+    // ==========================================
+
     const user = await User.findOne({
       _id: userId,
       role: "user",
@@ -105,7 +195,10 @@ export const getUserDashboard = async (req, res) => {
       });
     }
 
-    // Get all bookings of this user
+    // ==========================================
+    // GET USER BOOKINGS
+    // ==========================================
+
     const bookings = await Booking.find({
       user: userId,
     }).populate(
@@ -113,28 +206,133 @@ export const getUserDashboard = async (req, res) => {
       "title category description date time duration meetingLink"
     );
 
-    // Total bookings
-    const totalBookings = bookings.length;
+    const now = new Date();
 
-    // Upcoming bookings
-    const upcomingBookings = bookings.filter(
+    // ==========================================
+    // CONVERT BOOKING DATE + TIME
+    // ==========================================
+
+    const getClassDateTime = (booking) => {
+      if (!booking?.class?.date) {
+        return null;
+      }
+
+      const date = booking.class.date;
+
+      let time =
+        booking.selectedSlot ||
+        booking.class.time;
+
+      if (!time) {
+        return null;
+      }
+
+      // Example:
+      // 10:00 AM - 11:00 AM
+      // 5:00 PM - 6:00 PM
+      // 16:30
+
+      if (time.includes("-")) {
+        time = time.split("-")[0].trim();
+      }
+
+      // ==========================================
+      // CONVERT 12 HOUR FORMAT
+      // ==========================================
+
+      if (
+        time.toUpperCase().includes("AM") ||
+        time.toUpperCase().includes("PM")
+      ) {
+        const parts = time.trim().split(/\s+/);
+
+        let clock = parts[0];
+        const period = parts[1]?.toUpperCase();
+
+        let [hours, minutes] =
+          clock.split(":").map(Number);
+
+        if (period === "PM" && hours !== 12) {
+          hours += 12;
+        }
+
+        if (period === "AM" && hours === 12) {
+          hours = 0;
+        }
+
+        time =
+          String(hours).padStart(2, "0") +
+          ":" +
+          String(minutes || 0).padStart(2, "0");
+      }
+
+      const classDateTime = new Date(
+        `${date}T${time}`
+      );
+
+      if (isNaN(classDateTime.getTime())) {
+        return null;
+      }
+
+      return classDateTime;
+    };
+
+    // ==========================================
+    // VALID BOOKINGS
+    // ==========================================
+
+    const validBookings = bookings.filter(
       (booking) =>
         booking.bookingStatus === "Confirmed" ||
-        booking.bookingStatus === "Pending"
-    );
-
-    // Completed bookings
-    const completedBookings = bookings.filter(
-      (booking) =>
+        booking.bookingStatus === "Pending" ||
         booking.bookingStatus === "Completed"
     );
 
-    // Feedback given by user
+    // ==========================================
+    // UPCOMING BOOKINGS
+    // ==========================================
+
+    const upcomingBookings = validBookings.filter(
+      (booking) => {
+        const classDateTime =
+          getClassDateTime(booking);
+
+        return (
+          classDateTime &&
+          classDateTime > now
+        );
+      }
+    );
+
+    // ==========================================
+    // COMPLETED BOOKINGS
+    // ==========================================
+
+    const completedBookings = validBookings.filter(
+      (booking) => {
+        const classDateTime =
+          getClassDateTime(booking);
+
+        return (
+          classDateTime &&
+          classDateTime <= now
+        );
+      }
+    );
+
+    // ==========================================
+    // FEEDBACK
+    // ==========================================
+
     const feedbacks = await Feedback.find({
       user: userId,
     });
 
     const feedbackGiven = feedbacks.length;
+
+    // ==========================================
+    // RESPONSE
+    // ==========================================
 
     res.status(200).json({
       success: true,
@@ -147,14 +345,20 @@ export const getUserDashboard = async (req, res) => {
       },
 
       stats: {
-        totalBookings,
-        upcoming: upcomingBookings.length,
-        completed: completedBookings.length,
+        totalBookings: validBookings.length,
+
+        upcomingBookings:
+          upcomingBookings.length,
+
+        completedBookings:
+          completedBookings.length,
+
         feedbackGiven,
       },
 
       upcomingBookings,
 
+      completedBookings,
     });
 
   } catch (error) {
