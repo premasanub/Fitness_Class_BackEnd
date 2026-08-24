@@ -175,6 +175,10 @@ res.status(200).json({
 // USER DASHBOARD
 // =====================================================
 
+// =====================================================
+// USER DASHBOARD
+// =====================================================
+
 export const getUserDashboard = async (req, res) => {
   try {
     const userId = req.params.id;
@@ -206,19 +210,24 @@ export const getUserDashboard = async (req, res) => {
       "title category description date time duration meetingLink"
     );
 
+    // ==========================================
+    // CURRENT DATE
+    // ==========================================
+
     const now = new Date();
 
     // ==========================================
-    // CONVERT BOOKING DATE + TIME
+    // GET CLASS DATE + TIME
     // ==========================================
 
-    const getClassDateTime = (booking) => {
+    const getBookingDateTime = (booking) => {
       if (!booking?.class?.date) {
         return null;
       }
 
       const date = booking.class.date;
 
+      // selectedSlot first
       let time =
         booking.selectedSlot ||
         booking.class.time;
@@ -228,16 +237,15 @@ export const getUserDashboard = async (req, res) => {
       }
 
       // Example:
-      // 10:00 AM - 11:00 AM
-      // 5:00 PM - 6:00 PM
-      // 16:30
+      // "10:00 AM - 11:00 AM"
+      // Take only starting time
 
       if (time.includes("-")) {
         time = time.split("-")[0].trim();
       }
 
       // ==========================================
-      // CONVERT 12 HOUR FORMAT
+      // 12 HOUR FORMAT
       // ==========================================
 
       if (
@@ -247,7 +255,7 @@ export const getUserDashboard = async (req, res) => {
         const parts = time.trim().split(/\s+/);
 
         let clock = parts[0];
-        const period = parts[1]?.toUpperCase();
+        const period = parts[1].toUpperCase();
 
         let [hours, minutes] =
           clock.split(":").map(Number);
@@ -266,15 +274,15 @@ export const getUserDashboard = async (req, res) => {
           String(minutes || 0).padStart(2, "0");
       }
 
-      const classDateTime = new Date(
+      const result = new Date(
         `${date}T${time}`
       );
 
-      if (isNaN(classDateTime.getTime())) {
+      if (isNaN(result.getTime())) {
         return null;
       }
 
-      return classDateTime;
+      return result;
     };
 
     // ==========================================
@@ -283,19 +291,19 @@ export const getUserDashboard = async (req, res) => {
 
     const validBookings = bookings.filter(
       (booking) =>
+        booking.paymentStatus === "Paid" ||
         booking.bookingStatus === "Confirmed" ||
-        booking.bookingStatus === "Pending" ||
         booking.bookingStatus === "Completed"
     );
 
     // ==========================================
-    // UPCOMING BOOKINGS
+    // UPCOMING
     // ==========================================
 
     const upcomingBookings = validBookings.filter(
       (booking) => {
         const classDateTime =
-          getClassDateTime(booking);
+          getBookingDateTime(booking);
 
         return (
           classDateTime &&
@@ -305,13 +313,13 @@ export const getUserDashboard = async (req, res) => {
     );
 
     // ==========================================
-    // COMPLETED BOOKINGS
+    // COMPLETED
     // ==========================================
 
     const completedBookings = validBookings.filter(
       (booking) => {
         const classDateTime =
-          getClassDateTime(booking);
+          getBookingDateTime(booking);
 
         return (
           classDateTime &&
@@ -321,7 +329,7 @@ export const getUserDashboard = async (req, res) => {
     );
 
     // ==========================================
-    // FEEDBACK
+    // FEEDBACK GIVEN
     // ==========================================
 
     const feedbacks = await Feedback.find({
@@ -329,6 +337,14 @@ export const getUserDashboard = async (req, res) => {
     });
 
     const feedbackGiven = feedbacks.length;
+
+    // ==========================================
+    // TOTAL BOOKINGS
+    // ==========================================
+
+    const totalBookings =
+      upcomingBookings.length +
+      completedBookings.length;
 
     // ==========================================
     // RESPONSE
@@ -345,19 +361,13 @@ export const getUserDashboard = async (req, res) => {
       },
 
       stats: {
-        totalBookings: validBookings.length,
-
-        upcomingBookings:
-          upcomingBookings.length,
-
-        completedBookings:
-          completedBookings.length,
-
+        totalBookings,
+        upcomingBookings: upcomingBookings.length,
+        completedBookings: completedBookings.length,
         feedbackGiven,
       },
 
       upcomingBookings,
-
       completedBookings,
     });
 
