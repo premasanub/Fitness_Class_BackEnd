@@ -43,82 +43,34 @@
 
 import nodemailer from "nodemailer";
 import dotenv from "dotenv";
-// import dns from "dns";
 
 dotenv.config();
 
-// Prefer IPv4
-// dns.setDefaultResultOrder("ipv4first");
-
-// const transporter = nodemailer.createTransport({
-//   host: "smtp.gmail.com",
-//   port: 465,
-//   secure: true,
-
-//   auth: {
-//     user: process.env.MAIL_USER,
-//     pass: process.env.MAIL_KEY,
-//   },
-
-//   connectionTimeout: 10000,
-//   greetingTimeout: 10000,
-//   socketTimeout: 15000,
-// });
-
-// const sendMail = async (to, subject, text) => {
-//   try {
-//     console.log("📧 Sending email to:", to);
-
-//     const info = await transporter.sendMail({
-//       from: process.env.MAIL_USER,
-//       to,
-//       subject,
-//       text,
-//     });
-
-//     console.log("✅ Mail sent successfully");
-//     console.log("Message ID:", info.messageId);
-
-//     return info;
-//   } catch (error) {
-//     console.error("❌ Mail sending failed:", error);
-//     throw error;
-//   }
-// };
-
-// export default sendMail;
-
- const sendMail = async (to, subject, text) => {
+const sendMail = async (to, subject, text) => {
   const transporter = nodemailer.createTransport({
-    host: 'smtp.gmail.com',
-   tls: {
-     rejectUnauthorized: false
-   },
-    port: 465,
-    secure: true,
-    logger: true,
-    debug: true,
+    host: "smtp.gmail.com",
+    port: 587,
+    secure: false,
     auth: {
       user: process.env.MAIL_USER,
-      pass: process.env.MAIL_KEY
-    }
+      pass: process.env.MAIL_KEY,
+    },
   });
+
+  await transporter.verify();
 
   const mailData = {
     from: process.env.MAIL_USER,
-    to,
-    subject,
-    text,
+    to: to,
+    subject: subject,
+    text: text,
   };
-  await new Promise((resolve, reject) => {
-    transporter.sendMail(mailData, (err, info) => {
-      if (err) {
-        reject(err);
-      } else {
-        console.log("Mail Send Successfully")
-        resolve(info);
-      }
-    });
-  });
+
+  const info = await transporter.sendMail(mailData);
+
+  console.log("Mail sent successfully:", info.messageId);
+
+  return info;
 };
+
 export default sendMail;
