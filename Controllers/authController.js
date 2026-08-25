@@ -9,7 +9,7 @@ dotenv.config();
 //Register a new user
 export const register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password , referralCode,} = req.body;
 
     const existingUser = await User.findOne({ email });
     if (existingUser) {
@@ -18,7 +18,31 @@ export const register = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const user = new User({ name, email, password: hashedPassword });
+
+    // Find referrer
+    let referredBy = null;
+
+if (referralCode) {
+  const referrer = await User.findOne({
+    referralCode,
+    role: "user",
+  });
+
+  if (referrer) {
+    referredBy = referrer._id;
+
+    await User.findByIdAndUpdate(
+      referrer._id,
+      {
+        $inc: {
+          referralCount: 1,
+        },
+      }
+    );
+  }
+}
+
+    const user = new User({ name, email, password: hashedPassword , referredBy,});
     await user.save();
 
     res

@@ -2,7 +2,7 @@ import User from "../Models/user.js";
 import Class from "../Models/class.js";
 import Booking from "../Models/booking.js";
 import Feedback from "../Models/feedback.js";
-
+import ReferralOffer from "../Models/referralOffer.js";
 
 // =====================================================
 // ADMIN DASHBOARD
@@ -326,5 +326,100 @@ export const getAdminBookings = async (req, res) => {
       message: error.message,
     });
 
+  }
+};
+
+
+
+
+// =====================================================
+// GET REFERRAL OFFER
+// =====================================================
+
+export const getReferralOffer = async (req, res) => {
+  try {
+    let offer = await ReferralOffer.findOne().sort({
+      createdAt: -1,
+    });
+
+    if (!offer) {
+      offer = await ReferralOffer.create({
+        title: "Refer & Earn",
+        description:
+          "Refer your friends and family and enjoy a special offer.",
+        discount: 10,
+        emailSubject:
+          "Refer Your Friends & Family 🎁",
+        emailMessage:
+          "Invite your friends and family to join our fitness classes!",
+        weeklyEmailEnabled: true,
+        isActive: true,
+      });
+    }
+
+    res.status(200).json({
+      success: true,
+      offer,
+    });
+  } catch (error) {
+    console.log("Get Referral Offer Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+// =====================================================
+// CREATE / UPDATE REFERRAL OFFER
+// =====================================================
+
+export const updateReferralOffer = async (req, res) => {
+  try {
+    const {
+      title,
+      description,
+      discount,
+      emailSubject,
+      emailMessage,
+      expiryDate,
+      isActive,
+      weeklyEmailEnabled,
+    } = req.body;
+
+    let offer = await ReferralOffer.findOne();
+
+    if (!offer) {
+      offer = new ReferralOffer();
+    }
+
+    offer.title = title;
+    offer.description = description;
+    offer.discount = discount;
+    offer.emailSubject = emailSubject;
+    offer.emailMessage = emailMessage;
+    offer.expiryDate = expiryDate || null;
+    offer.isActive = isActive;
+    offer.weeklyEmailEnabled =
+      weeklyEmailEnabled;
+
+    await offer.save();
+
+    res.status(200).json({
+      success: true,
+      message: "Referral offer updated successfully",
+      offer,
+    });
+  } catch (error) {
+    console.log(
+      "Update Referral Offer Error:",
+      error
+    );
+
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
   }
 };

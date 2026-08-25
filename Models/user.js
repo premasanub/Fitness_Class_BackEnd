@@ -117,16 +117,72 @@ meetingLink: {
   type: String,
   default: "",
 },
+
+//referal code
+referralCode: {
+  type: String,
+  unique: true,
+  sparse: true,
+},
+
+referredBy: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "User",
+  default: null,
+},
+
+referralCount: {
+  type: Number,
+  default: 0,
+},
+
+//referal code end
+
 isActive: {
   type: Boolean,
   default: true,
 },
+
+//referal code for frends
+
+referralCode: {
+  type: String,
+  unique: true,
+  sparse: true,
+},
+
+referredBy: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "User",
+  default: null,
+},
+
+referralCount: {
+  type: Number,
+  default: 0,
+},
+
+
+
+
+
 
   },
   {
     timestamps: true,
   }
 );
+
+//refer to friends automatically generate referral code before saving user
+userSchema.pre("save", function (next) {
+  if (!this.referralCode) {
+    this.referralCode =
+      this._id.toString().slice(-6).toUpperCase();
+  }
+
+  next();
+});
+
 
 // ✅ Prevent OverwriteModelError
 const User = mongoose.models.User || mongoose.model("User", userSchema);

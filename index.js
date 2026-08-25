@@ -10,6 +10,9 @@ import bookingRoutes from "./Routes/bookingRoutes.js";
 import paymentRoutes from "./Routes/paymentRoutes.js";
 import feedbackRoutes from "./Routes/feedbackRoutes.js";
 import adminRoutes from "./Routes/adminRoutes.js";
+
+import referralRoutes from "./Routes/referralRoutes.js";
+
 //dotenv config
 dotenv.config();
 
@@ -46,6 +49,10 @@ app.use("/api/bookings", bookingRoutes);
 app.use("/api/payment", paymentRoutes);
 app.use("/api/feedback", feedbackRoutes);
 app.use("/api/admin",adminRoutes);
+app.use(
+  "/api/referral",
+  referralRoutes
+);
 
 app.listen(port, () => {
     console.log("Server Started");

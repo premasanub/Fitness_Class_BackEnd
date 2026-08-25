@@ -8,6 +8,16 @@ import {
   getAdminBookings,
 } from "../Controllers/adminController.js";
 
+import {
+  getAdminDashboard,
+  getAdminUsers,
+  getAdminTrainers,
+  getAdminClasses,
+  getAdminBookings,
+  getReferralOffer,
+  updateReferralOffer,
+} from "../Controllers/adminController.js";
+
 const router = express.Router();
 
 
@@ -60,5 +70,19 @@ router.get(
   getAdminBookings
 );
 
+
+// =====================================================
+// REFERRAL OFFER
+// =====================================================
+
+router.get(
+  "/referral-offer",
+  getReferralOffer
+);
+
+router.put(
+  "/referral-offer",
+  updateReferralOffer
+);
 
 export default router;
