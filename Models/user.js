@@ -174,13 +174,13 @@ referralCount: {
 );
 
 //refer to friends automatically generate referral code before saving user
-userSchema.pre("save", function (next) {
+userSchema.pre("save", function () {
   if (!this.referralCode) {
-    this.referralCode =
-      this._id.toString().slice(-6).toUpperCase();
+    this.referralCode = this._id
+      .toString()
+      .slice(-6)
+      .toUpperCase();
   }
-
-  next();
 });
 
 
