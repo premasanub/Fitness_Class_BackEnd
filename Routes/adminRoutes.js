@@ -1,12 +1,12 @@
 import express from "express";
 
-import {
-  getAdminDashboard,
-  getAdminUsers,
-  getAdminTrainers,
-  getAdminClasses,
-  getAdminBookings,
-} from "../Controllers/adminController.js";
+// import {
+//   getAdminDashboard,
+//   getAdminUsers,
+//   getAdminTrainers,
+//   getAdminClasses,
+//   getAdminBookings,
+// } from "../Controllers/adminController.js";
 
 import {
   getAdminDashboard,
