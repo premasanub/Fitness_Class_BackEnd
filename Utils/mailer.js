@@ -82,4 +82,42 @@ const sendMail = async (to, subject, text) => {
   }
 };
 
+export default sendMail;import axios from "axios";
+import dotenv from "dotenv";
+
+dotenv.config();
+
+const sendMail = async (to, subject, text) => {
+  try {
+    const response = await axios.post(
+      "https://api.brevo.com/v3/smtp/email",
+      {
+        sender: {
+          name: process.env.BREVO_SENDER_NAME,
+          email: process.env.BREVO_SENDER_EMAIL,
+        },
+        to: [
+          {
+            email: to,
+          },
+        ],
+        subject: subject,
+        textContent: text,
+      },
+      {
+        headers: {
+          accept: "application/json",
+          "content-type": "application/json",
+          "api-key": process.env.BREVO_API_KEY,
+        },
+      }
+    );
+
+    console.log("Mail sent:", response.data);
+  } catch (error) {
+    console.log("Brevo Error:", error.response?.status);
+    console.log("Brevo Body:", error.response?.data);
+  }
+};
+
 export default sendMail;
