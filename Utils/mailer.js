@@ -41,48 +41,7 @@
 
 
 
-import { BrevoClient } from "@getbrevo/brevo";
-import dotenv from "dotenv";
-
-dotenv.config();
-
-const brevo = new BrevoClient({
-  apiKey: process.env.BREVO_API_KEY,
-});
-
-const sendMail = async (to, subject, text) => {
-  try {
-    const result = await brevo.transactionalEmails.sendTransacEmail({
-      sender: {
-        name: process.env.MAIL_FROM_NAME,
-        email: process.env.MAIL_FROM_EMAIL,
-      },
-
-      to: [
-        {
-          email: to,
-        },
-      ],
-
-      subject: subject,
-      textContent: text,
-    });
-
-    console.log("Mail Send Successfully");
-    console.log("Brevo Message ID:", result.messageId);
-
-    return result;
-  } catch (error) {
-    console.error(
-      "Brevo Mail Error:",
-      error?.response?.body || error?.message || error
-    );
-
-    throw error;
-  }
-};
-
-export default sendMail;import axios from "axios";
+import axios from "axios";
 import dotenv from "dotenv";
 
 dotenv.config();
@@ -93,8 +52,8 @@ const sendMail = async (to, subject, text) => {
       "https://api.brevo.com/v3/smtp/email",
       {
         sender: {
-          name: process.env.BREVO_SENDER_NAME,
-          email: process.env.BREVO_SENDER_EMAIL,
+          name: process.env.MAIL_FROM_NAME,
+          email: process.env.MAIL_FROM_EMAIL,
         },
         to: [
           {
