@@ -172,7 +172,7 @@ export const forgotPassword = async (req, res) => {
       user.email,
       "Password Reset link",
       `You are receiving this email because you have requested to reset your password.
-       Please click the following link to reset your password: https://fitness-class-front-end-hb3y-ivwme66dt-premas-projects.vercel.app/reset-password/${user._id}/${token}
+       Please click the following link to reset your password: https://fitness-class-front-end-hb3y.vercel.app/reset-password/${user._id}/${token}
        If you did not request this, please ignore this email.`
     );
     res.status(200).json({ message: "Email sent successfully" });
