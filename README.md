@@ -186,3 +186,11 @@ backend/
 ├── .gitignore
 ├── package.json
 └── server.js
+
+postman tests are available in the `postman_tests` folder.
+# 📁 Postman Link:
+          https://documenter.getpostman.com/view/47538481/2sBYAuSBUc  
+
+
+##Deployment Link:
+                 https://fitness-class-backend.onrender.com
