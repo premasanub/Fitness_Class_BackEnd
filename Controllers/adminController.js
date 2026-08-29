@@ -412,10 +412,8 @@ export const updateReferralOffer = async (req, res) => {
       offer,
     });
   } catch (error) {
-    console.log(
-      "Update Referral Offer Error:",
-      error
-    );
+    console.log("Update Referral Offer Error:", error); 
+    
 
     res.status(500).json({
       success: false,
