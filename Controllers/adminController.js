@@ -175,11 +175,6 @@ export const getAdminDashboard = async (req, res) => {
 
   } catch (error) {
 
-    console.log(
-      "Admin Dashboard Error:",
-      error
-    );
-
     res.status(500).json({
 
       success: false,
@@ -210,7 +205,6 @@ export const getAdminUsers = async (req, res) => {
     });
 
   } catch (error) {
-    console.log("Admin Users Error:", error);
 
     res.status(500).json({
       success: false,
@@ -238,7 +232,6 @@ export const getAdminTrainers = async (req, res) => {
     });
 
   } catch (error) {
-    console.log("Admin Trainers Error:", error);
 
     res.status(500).json({
       success: false,
@@ -270,11 +263,6 @@ export const getAdminClasses = async (req, res) => {
     });
 
   } catch (error) {
-
-    console.log(
-      "Admin Classes Error:",
-      error
-    );
 
     res.status(500).json({
       success: false,
@@ -315,11 +303,6 @@ export const getAdminBookings = async (req, res) => {
     });
 
   } catch (error) {
-
-    console.log(
-      "Admin Bookings Error:",
-      error
-    );
 
     res.status(500).json({
       success: false,
@@ -362,7 +345,6 @@ export const getReferralOffer = async (req, res) => {
       offer,
     });
   } catch (error) {
-    console.log("Get Referral Offer Error:", error);
 
     res.status(500).json({
       success: false,
@@ -401,20 +383,15 @@ export const updateReferralOffer = async (req, res) => {
     offer.emailMessage = emailMessage;
     offer.expiryDate = expiryDate || null;
     offer.isActive = isActive;
-    offer.weeklyEmailEnabled =
-      weeklyEmailEnabled;
+    offer.weeklyEmailEnabled = weeklyEmailEnabled;
 
     await offer.save();
 
     res.status(200).json({
       success: true,
-      message: "Referral offer updated successfully",
       offer,
     });
   } catch (error) {
-    console.log("Update Referral Offer Error:", error); 
-    
-
     res.status(500).json({
       success: false,
       message: error.message,
