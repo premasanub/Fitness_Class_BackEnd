@@ -64,7 +64,6 @@ export const createFeedback = async (req, res) => {
     });
 
   } catch (error) {
-    console.log("CREATE FEEDBACK ERROR:", error);
 
     res.status(500).json({
       success: false,

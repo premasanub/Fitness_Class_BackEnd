@@ -42,7 +42,6 @@ export const getReferralDetails = async (req, res) => {
       offer,
     });
   } catch (error) {
-    console.log("Referral Details Error:", error);
 
     res.status(500).json({
       success: false,

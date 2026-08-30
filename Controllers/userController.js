@@ -1,131 +1,4 @@
-// import User from "../Models/user.js";
-// import Booking from "../Models/booking.js";
-// import Feedback from "../Models/feedback.js";
-// // ===============================
-// // Get Logged-in User Profile
-// // ===============================
-// export const getProfile = async (req, res) => {
-//   try {
-//     const user = await User.findById(req.user._id).select("-password");
 
-//     if (!user) {
-//       return res.status(404).json({
-//         message: "User not found",
-//       });
-//     }
-
-//     res.status(200).json({
-//       success: true,
-//       user,
-//     });
-//   } catch (error) {
-//     console.error(error);
-
-//     res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
-
-// ===============================
-// Update Logged-in User Profile
-// ===============================
-// ------------------------------------------------------------------------------
-// // =====================================================
-// // USER DASHBOARD
-// // =====================================================
-
-// export const getUserDashboard = async (req, res) => {
-//   try {
-//     const userId = req.params.id;
-
-//     // Check user
-//     const user = await User.findOne({
-//       _id: userId,
-//       role: "user",
-//     }).select("-password");
-
-//     if (!user) {
-//       return res.status(404).json({
-//         success: false,
-//         message: "User not found",
-//       });
-//     }
-
-//     // Get all bookings of this user
-//     const bookings = await Booking.find({
-//       user: userId,
-//     }).populate(
-//       "class",
-//       "title category description date time duration meetingLink"
-//     );
-
-//     // Total bookings
-//     const totalBookings = bookings.length;
-
-//     // Upcoming bookings
-//     const upcomingBookings = bookings.filter(
-//       (booking) =>
-//         booking.bookingStatus === "Confirmed" ||
-//         booking.bookingStatus === "Pending"
-//     );
-
-//     // Completed bookings
-//     const completedBookings = bookings.filter(
-//       (booking) =>
-//         booking.bookingStatus === "Completed"
-//     );
-
-//     // Feedback given by user
-//     const feedbacks = await Feedback.find({
-//       user: userId,
-//     });
-
-//     const feedbackGiven = feedbacks.length;
-
-//     res.status(200).json({
-//       success: true,
-
-//       user: {
-//         id: user._id,
-//         name: user.name,
-//         email: user.email,
-//         profileImage: user.profileImage,
-//       },
-
-//       stats: {
-//         totalBookings,
-//         upcoming: upcomingBookings.length,
-//         completed: completedBookings.length,
-//         feedbackGiven,
-//       },
-
-//       upcomingBookings,
-
-//     });
-
-//   } catch (error) {
-//     console.log(
-//       "User Dashboard Error:",
-//       error
-//     );
-
-//     res.status(500).json({
-//       success: false,
-//       message: error.message,
-//     });
-//   }
-// };
-
-
-// =====================================================
-// USER DASHBOARD
-// =====================================================
-
-// =====================================================
-// USER DASHBOARD
-// =====================================================
 
 import User from "../Models/user.js";
 import Booking from "../Models/booking.js";
@@ -153,8 +26,6 @@ export const getProfile = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Get Profile Error:", error);
-
     res.status(500).json({
       success: false,
       message: error.message,
@@ -240,8 +111,6 @@ export const updateProfile = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Update Profile Error:", error);
-
     res.status(500).json({
       success: false,
       message: error.message,
@@ -315,11 +184,7 @@ export const getUserDashboard = async (req, res) => {
 
       time = String(time).trim();
 
-      // -----------------------------------------------
-      // If slot is:
-      // "10:00 AM - 11:00 AM"
-      // -----------------------------------------------
-
+      
       if (time.includes("-")) {
         time = time
           .split("-")[0]
@@ -477,12 +342,6 @@ export const getUserDashboard = async (req, res) => {
     });
 
   } catch (error) {
-
-    console.error(
-      "User Dashboard Error:",
-      error
-    );
-
     res.status(500).json({
       success: false,
       message: error.message,

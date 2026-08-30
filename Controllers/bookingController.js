@@ -161,8 +161,6 @@ export const getUserDashboard = async (req, res) => {
     });
 
   } catch (error) {
-    console.error("Dashboard Error:", error);
-
     res.status(500).json({
       success: false,
       message: error.message,

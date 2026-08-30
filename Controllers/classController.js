@@ -18,8 +18,6 @@ export const getAllClasses = async (req, res) => {
 
   } catch (error) {
 
-    console.log("Get All Classes Error:", error);
-
     res.status(500).json({
       success: false,
       message: error.message,
@@ -47,8 +45,6 @@ export const getClassById = async (req, res) => {
     });
 
   } catch (error) {
-
-    console.log("GET CLASS BY ID ERROR:", error);
 
     res.status(500).json({
       success: false,
