@@ -20,7 +20,8 @@ export const createBooking = async (req, res) => {
       });
     }
 
-    if (fitnessClass.seats <= 0) {
+    if (fitnessClass.seats <= 0) 
+      {
       return res.status(400).json({
         message: "No seats available",
       });
