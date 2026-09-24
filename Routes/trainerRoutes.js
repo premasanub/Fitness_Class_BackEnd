@@ -16,6 +16,7 @@ import {
   getTrainerSchedule,
   addTrainerSchedule,
   deleteTrainerSchedule,
+  updateTrainerSchedule,
 } from "../Controllers/trainerController.js";
 
 import upload from "../Config/Multer.js";
@@ -145,5 +146,14 @@ router.get(
   getTrainerById
 );
 
+
+// =====================================================
+// UPDATE TRAINER SCHEDULE
+// =====================================================
+
+router.put(
+  "/schedule/:trainerId/:scheduleId",
+  updateTrainerSchedule
+);
 
 export default router;

@@ -917,33 +917,73 @@ export const getTrainerReviews = async (
 // GET TRAINER SCHEDULE
 // =====================================================
 
-export const getTrainerSchedule = async (
-  req,
-  res
-) => {
-  try {
-    const trainerId = req.params.id;
+// export const getTrainerSchedule = async (
+//   req,
+//   res
+// ) => {
+//   try {
+//     const trainerId = req.params.id;
 
-    const schedules =
-      await Class.find({
-        trainer: trainerId,
-      }).sort({
-        createdAt: -1,
-      });
+//     const schedules =
+//       await Class.find({
+//         trainer: trainerId,
+//       }).sort({
+//         createdAt: -1,
+//       });
+
+//     res.status(200).json({
+//       success: true,
+//       count: schedules.length,
+//       schedules,
+//     });
+
+//   } catch (error) {
+
+//     console.log(
+//       "Get Trainer Schedule Error:",
+//       error
+//     );
+
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
+
+export const getTrainerSchedule = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const schedules = await Class.find({
+      trainer: id,
+    })
+      .sort({ createdAt: -1 })
+      .lean();
+
+    const schedulesWithBookings = await Promise.all(
+      schedules.map(async (schedule) => {
+        const studentsBooked = await Booking.countDocuments({
+          class: schedule._id,
+          bookingStatus: {
+            $in: ["Pending", "Confirmed", "Completed"],
+          },
+        });
+
+        return {
+          ...schedule,
+          studentsBooked,
+        };
+      })
+    );
 
     res.status(200).json({
       success: true,
-      count: schedules.length,
-      schedules,
+      schedules: schedulesWithBookings,
     });
 
   } catch (error) {
-
-    console.log(
-      "Get Trainer Schedule Error:",
-      error
-    );
-
     res.status(500).json({
       success: false,
       message: error.message,
@@ -1113,6 +1153,74 @@ export const deleteTrainerSchedule = async (
       error
     );
 
+    res.status(500).json({
+      success: false,
+      message: error.message,
+    });
+  }
+};
+
+
+export const updateTrainerSchedule = async (req, res) => {
+  try {
+    const { trainerId, scheduleId } = req.params;
+
+    const {
+      className,
+      day,
+      time,
+      duration,
+      seats,
+    } = req.body;
+
+    const existingClass = await Class.findOne({
+      _id: scheduleId,
+      trainer: trainerId,
+    });
+
+    if (!existingClass) {
+      return res.status(404).json({
+        success: false,
+        message: "Schedule not found",
+      });
+    }
+
+    existingClass.title =
+      className || existingClass.title;
+
+    existingClass.day =
+      day || existingClass.day;
+
+    existingClass.duration =
+      duration || existingClass.duration;
+
+    existingClass.seats =
+      Number(seats);
+
+    existingClass.timeSlots = time
+      ? [time]
+      : existingClass.timeSlots;
+
+    await existingClass.save();
+
+    const studentsBooked =
+      await Booking.countDocuments({
+        class: existingClass._id,
+        bookingStatus: {
+          $in: ["Pending", "Confirmed", "Completed"],
+        },
+      });
+
+    res.status(200).json({
+      success: true,
+      message: "Schedule updated successfully",
+      schedule: {
+        ...existingClass.toObject(),
+        studentsBooked,
+      },
+    });
+
+  } catch (error) {
     res.status(500).json({
       success: false,
       message: error.message,
