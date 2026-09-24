@@ -1164,10 +1164,9 @@ export const deleteTrainerSchedule = async (
 export const updateTrainerSchedule = async (req, res) => {
   try {
     const { trainerId, scheduleId } = req.params;
-
     const {
       className,
-      day,
+      date,
       time,
       duration,
       seats,
@@ -1185,31 +1184,26 @@ export const updateTrainerSchedule = async (req, res) => {
       });
     }
 
-    existingClass.title =
-      className || existingClass.title;
+    existingClass.title = className || existingClass.title;
+    existingClass.date = date || existingClass.date;
+    existingClass.duration = duration || existingClass.duration;
 
-    existingClass.day =
-      day || existingClass.day;
+    if (time) {
+      existingClass.timeSlots = [time];
+    }
 
-    existingClass.duration =
-      duration || existingClass.duration;
-
-    existingClass.seats =
-      Number(seats);
-
-    existingClass.timeSlots = time
-      ? [time]
-      : existingClass.timeSlots;
+    if (seats !== undefined && seats !== "") {
+      existingClass.seats = Number(seats);
+    }
 
     await existingClass.save();
 
-    const studentsBooked =
-      await Booking.countDocuments({
-        class: existingClass._id,
-        bookingStatus: {
-          $in: ["Pending", "Confirmed", "Completed"],
-        },
-      });
+    const studentsBooked = await Booking.countDocuments({
+      class: existingClass._id,
+      bookingStatus: {
+        $in: ["Pending", "Confirmed", "Completed"],
+      },
+    });
 
     res.status(200).json({
       success: true,
@@ -1219,7 +1213,6 @@ export const updateTrainerSchedule = async (req, res) => {
         studentsBooked,
       },
     });
-
   } catch (error) {
     res.status(500).json({
       success: false,
