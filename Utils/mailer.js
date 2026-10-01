@@ -60,7 +60,7 @@ const sendMail = async (to, subject, text) => {
             email: to,
           },
         ],
-        subject: subject,
+        subject,
         textContent: text,
       },
       {
@@ -72,10 +72,20 @@ const sendMail = async (to, subject, text) => {
       }
     );
 
-    console.log("Mail sent:", response.data);
+    console.log("Mail sent successfully:", response.data);
+
+    return {
+      success: true,
+      messageId: response.data.messageId,
+    };
   } catch (error) {
-    console.log("Brevo Error:", error.response?.status);
-    console.log("Brevo Body:", error.response?.data);
+    console.error(
+      "Brevo Error:",
+      error.response?.status,
+      error.response?.data || error.message
+    );
+
+    throw error;
   }
 };
 
