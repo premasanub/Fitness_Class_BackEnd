@@ -405,6 +405,7 @@ export const updateTrainer = async (req, res) => {
       }
     }
 
+    
     // SPECIALIZATION VALIDATION
     if (data.specialization !== undefined) {
       const specialization = String(data.specialization).trim();
@@ -412,11 +413,17 @@ export const updateTrainer = async (req, res) => {
       if (!specialization) {
         errors.specialization = "Specialization is required";
       } else if (specialization.length < 2) {
-        errors.specialization = "Specialization must contain at least 2 characters";
+        errors.specialization =
+          "Specialization must contain at least 2 characters";
       } else if (specialization.length > 100) {
-        errors.specialization = "Specialization cannot exceed 100 characters";
+        errors.specialization =
+          "Specialization cannot exceed 100 characters";
+      } else if (!/^[a-zA-Z][a-zA-Z\s&/-]*$/.test(specialization)) {
+        errors.specialization =
+          "Specialization must start with a letter and contain only letters";
       }
     }
+
 
     // AVAILABLE DAYS VALIDATION
     if (data.availableDays !== undefined) {
