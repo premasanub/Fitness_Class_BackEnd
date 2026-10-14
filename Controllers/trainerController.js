@@ -311,11 +311,24 @@ export const updateTrainer = async (req, res) => {
     }
 
     // PHONE VALIDATION
-    if (data.phone !== undefined && data.phone !== "") {
-      if (!/^\+?[0-9]{10,15}$/.test(String(data.phone))) {
-        errors.phone = "Enter a valid phone number";
+    // if (data.phone !== undefined && data.phone !== "") {
+    //   if (!/^\+?[0-9]{10,15}$/.test(String(data.phone))) {
+    //     errors.phone = "Enter a valid phone number";
+    //   }
+    // }
+
+    
+    // PHONE VALIDATION
+    if (data.phone !== undefined) {
+      const phone = String(data.phone).trim();
+
+      if (!phone) {
+        errors.phone = "Phone number is required";
+      } else if (!/^[0-9]{10}$/.test(phone)) {
+        errors.phone = "Phone number must contain exactly 10 digits";
       }
     }
+
 
     // AGE VALIDATION
     if (data.age !== undefined && data.age !== "") {
