@@ -392,18 +392,28 @@ export const updateTrainer = async (req, res) => {
       errors.availableSlots = "Available slots must be a list";
     }
 
+    
     // QUALIFICATION VALIDATION
     if (data.qualification !== undefined) {
       const qualification = String(data.qualification).trim();
 
+      const validQualification =
+        /^[a-zA-Z]+(?:[.][a-zA-Z]+)*(?:\s*[-&,/]\s*[a-zA-Z]+(?:[.][a-zA-Z]+)*)*(?:\s+[a-zA-Z]+(?:[.][a-zA-Z]+)*)*$/;
+
       if (!qualification) {
         errors.qualification = "Qualification is required";
       } else if (qualification.length < 2) {
-        errors.qualification = "Qualification must contain at least 2 characters";
+        errors.qualification =
+          "Qualification must contain at least 2 characters";
       } else if (qualification.length > 100) {
-        errors.qualification = "Qualification cannot exceed 100 characters";
+        errors.qualification =
+          "Qualification cannot exceed 100 characters";
+      } else if (!validQualification.test(qualification)) {
+        errors.qualification =
+          "Enter a valid degree, e.g. B.Sc, B.Com, B.E, M.Sc or MCA";
       }
     }
+
 
     
     // SPECIALIZATION VALIDATION
