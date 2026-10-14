@@ -392,6 +392,134 @@ export const updateTrainer = async (req, res) => {
       errors.availableSlots = "Available slots must be a list";
     }
 
+    // QUALIFICATION VALIDATION
+    if (data.qualification !== undefined) {
+      const qualification = String(data.qualification).trim();
+
+      if (!qualification) {
+        errors.qualification = "Qualification is required";
+      } else if (qualification.length < 2) {
+        errors.qualification = "Qualification must contain at least 2 characters";
+      } else if (qualification.length > 100) {
+        errors.qualification = "Qualification cannot exceed 100 characters";
+      }
+    }
+
+    // SPECIALIZATION VALIDATION
+    if (data.specialization !== undefined) {
+      const specialization = String(data.specialization).trim();
+
+      if (!specialization) {
+        errors.specialization = "Specialization is required";
+      } else if (specialization.length < 2) {
+        errors.specialization = "Specialization must contain at least 2 characters";
+      } else if (specialization.length > 100) {
+        errors.specialization = "Specialization cannot exceed 100 characters";
+      }
+    }
+
+    // AVAILABLE DAYS VALIDATION
+    if (data.availableDays !== undefined) {
+      const validDays = [
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+        "sunday",
+      ];
+
+      if (!Array.isArray(data.availableDays) || data.availableDays.length === 0) {
+        errors.availableDays = "Select at least one available day";
+      } else {
+        const days = data.availableDays.map((day) =>
+          String(day).trim().toLowerCase()
+        );
+
+        if (days.some((day) => !validDays.includes(day))) {
+          errors.availableDays = "Enter valid weekdays";
+        } else if (new Set(days).size !== days.length) {
+          errors.availableDays = "Duplicate available days are not allowed";
+        }
+      }
+    }
+
+    // AVAILABLE TIME VALIDATION
+    if (data.availableSlots !== undefined) {
+      if (
+        !Array.isArray(data.availableSlots) ||
+        data.availableSlots.length === 0
+      ) {
+        errors.availableSlots = "Available time is required";
+      } else {
+        const startTime = String(
+          data.availableSlots[0]?.startTime || ""
+        ).trim();
+
+        const validTime =
+          /^(?:(?:0?[1-9]|1[0-2]):[0-5]\d\s?(?:AM|PM)|(?:[01]?\d|2[0-3]):[0-5]\d)$/i;
+
+        if (!startTime) {
+          errors.availableSlots = "Available time is required";
+        } else if (!validTime.test(startTime)) {
+          errors.availableSlots =
+            "Enter a valid time, for example 08:00 PM";
+        }
+      }
+    }
+
+    // HEIGHT VALIDATION
+    if (data.height !== undefined) {
+      const heightText = String(data.height).trim();
+      const height = Number(heightText.replace(/\s*cm$/i, ""));
+
+      if (!heightText) {
+        errors.height = "Height is required";
+      } else if (!Number.isFinite(height) || height < 50 || height > 300) {
+        errors.height = "Height must be between 50 and 300 cm";
+      }
+    }
+
+    // WEIGHT VALIDATION
+    if (data.weight !== undefined) {
+      const weightText = String(data.weight).trim();
+      const weight = Number(weightText.replace(/\s*kg$/i, ""));
+
+      if (!weightText) {
+        errors.weight = "Weight is required";
+      } else if (!Number.isFinite(weight) || weight < 10 || weight > 500) {
+        errors.weight = "Weight must be between 10 and 500 kg";
+      }
+    }
+
+    // FITNESS GOAL VALIDATION
+    if (data.goal !== undefined) {
+      const goal = String(data.goal).trim();
+
+      if (!goal) {
+        errors.goal = "Fitness goal is required";
+      } else if (goal.length < 3) {
+        errors.goal = "Fitness goal must contain at least 3 characters";
+      } else if (goal.length > 200) {
+        errors.goal = "Fitness goal cannot exceed 200 characters";
+      }
+    }
+    
+    // ADDRESS VALIDATION
+    if (data.address !== undefined) {
+      const address = String(data.address).trim();
+
+      if (!address) {
+        errors.address = "Address is required";
+      } else if (address.length < 5) {
+        errors.address = "Address must contain at least 5 characters";
+      } else if (address.length > 200) {
+        errors.address = "Address cannot exceed 200 characters";
+      }
+    }
+
+
     // RETURN FIELD-WISE ERRORS
     if (Object.keys(errors).length > 0) {
       return res.status(400).json({
