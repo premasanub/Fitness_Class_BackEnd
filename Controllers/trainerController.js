@@ -147,6 +147,121 @@ export const createTrainer = async (req, res) => {
 // UPDATE TRAINER PROFILE
 // =====================================================
 
+// export const updateTrainer = async (req, res) => {
+//   try {
+//     const trainer = await User.findOne({
+//       _id: req.params.id,
+//       role: "trainer",
+//     });
+
+//     if (!trainer) {
+//       return res.status(404).json({
+//         success: false,
+//         message: "Trainer not found",
+//       });
+//     }
+
+//     // BASIC DETAILS
+
+//     if (req.body.name !== undefined) {
+//       trainer.name = req.body.name;
+//     }
+
+//     if (req.body.email !== undefined) {
+//       trainer.email = req.body.email;
+//     }
+
+//     if (req.body.phone !== undefined) {
+//       trainer.phone = req.body.phone;
+//     }
+
+//     if (req.body.address !== undefined) {
+//       trainer.address = req.body.address;
+//     }
+
+//     if (req.body.age !== undefined) {
+//       trainer.age = req.body.age;
+//     }
+
+//     if (req.body.gender !== undefined) {
+//       trainer.gender = req.body.gender;
+//     }
+
+//     // TRAINER DETAILS
+
+//     if (req.body.qualification !== undefined) {
+//       trainer.qualification =
+//         req.body.qualification;
+//     }
+
+//     if (req.body.experience !== undefined) {
+//       trainer.experience =
+//         req.body.experience;
+//     }
+
+//     if (req.body.specialization !== undefined) {
+//       trainer.specialization =
+//         req.body.specialization;
+//     }
+
+//     if (req.body.bio !== undefined) {
+//       trainer.bio = req.body.bio;
+//     }
+
+//     if (req.body.meetingLink !== undefined) {
+//       trainer.meetingLink =
+//         req.body.meetingLink;
+//     }
+
+//     // AVAILABILITY
+
+//     if (req.body.availableDays !== undefined) {
+//       trainer.availableDays =
+//         req.body.availableDays;
+//     }
+
+//     if (req.body.availableSlots !== undefined) {
+//       trainer.availableSlots =
+//         req.body.availableSlots;
+//     }
+
+//     // FITNESS DETAILS
+
+//     if (req.body.height !== undefined) {
+//       trainer.height = req.body.height;
+//     }
+
+//     if (req.body.weight !== undefined) {
+//       trainer.weight = req.body.weight;
+//     }
+
+//     if (req.body.goal !== undefined) {
+//       trainer.goal = req.body.goal;
+//     }
+
+//     await trainer.save();
+
+//     const updatedTrainer =
+//       await User.findById(
+//         trainer._id
+//       ).select("-password");
+
+//     res.status(200).json({
+//       success: true,
+//       message: "Trainer profile updated successfully",
+//       trainer: updatedTrainer,
+//     });
+//   } catch (error) {
+//     console.log("Update Trainer Error:", error);
+
+//     res.status(500).json({
+//       success: false,
+//       message: error.message,
+//     });
+//   }
+// };
+
+
 export const updateTrainer = async (req, res) => {
   try {
     const trainer = await User.findOne({
@@ -161,102 +276,190 @@ export const updateTrainer = async (req, res) => {
       });
     }
 
-    // BASIC DETAILS
+    const data = req.body;
+    const errors = {};
 
-    if (req.body.name !== undefined) {
-      trainer.name = req.body.name;
+    // NAME VALIDATION
+    if (data.name !== undefined) {
+      if (!data.name.trim()) {
+        errors.name = "Full name is required";
+      } else if (data.name.trim().length < 3) {
+        errors.name = "Name must contain at least 3 characters";
+      }
     }
 
-    if (req.body.email !== undefined) {
-      trainer.email = req.body.email;
+    // EMAIL VALIDATION
+    if (data.email !== undefined) {
+      const email = String(data.email).trim();
+
+      if (!email) {
+        errors.email = "Email is required";
+      } else if (
+        !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)
+      ) {
+        errors.email = "Enter a valid email address";
+      } else {
+        const existingUser = await User.findOne({
+          email: { $regex: `^${email.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")}$`, $options: "i" },
+          _id: { $ne: trainer._id },
+        });
+
+        if (existingUser) {
+          errors.email = "This email is already registered";
+        }
+      }
     }
 
-    if (req.body.phone !== undefined) {
-      trainer.phone = req.body.phone;
+    // PHONE VALIDATION
+    if (data.phone !== undefined && data.phone !== "") {
+      if (!/^\+?[0-9]{10,15}$/.test(String(data.phone))) {
+        errors.phone = "Enter a valid phone number";
+      }
     }
 
-    if (req.body.address !== undefined) {
-      trainer.address = req.body.address;
+    // AGE VALIDATION
+    if (data.age !== undefined && data.age !== "") {
+      const age = Number(data.age);
+
+      if (!Number.isInteger(age) || age < 18 || age > 100) {
+        errors.age = "Age must be between 18 and 100";
+      }
     }
 
-    if (req.body.age !== undefined) {
-      trainer.age = req.body.age;
+    // GENDER VALIDATION
+    if (
+      data.gender &&
+      !["male", "female", "other"].includes(data.gender)
+    ) {
+      errors.gender = "Select a valid gender";
     }
 
-    if (req.body.gender !== undefined) {
-      trainer.gender = req.body.gender;
+    // EXPERIENCE VALIDATION
+    if (
+      data.experience !== undefined &&
+      data.experience !== ""
+    ) {
+      const experience = Number(data.experience);
+
+      if (
+        !Number.isFinite(experience) ||
+        experience < 0 ||
+        experience > 60
+      ) {
+        errors.experience =
+          "Experience must be between 0 and 60 years";
+      }
     }
 
-    // TRAINER DETAILS
+    // MEETING LINK VALIDATION
+    if (data.meetingLink) {
+      try {
+        const url = new URL(data.meetingLink);
 
-    if (req.body.qualification !== undefined) {
-      trainer.qualification =
-        req.body.qualification;
+        if (!["http:", "https:"].includes(url.protocol)) {
+          errors.meetingLink = "Enter a valid meeting link";
+        }
+      } catch {
+        errors.meetingLink = "Enter a valid meeting link";
+      }
     }
 
-    if (req.body.experience !== undefined) {
-      trainer.experience =
-        req.body.experience;
+    // AVAILABILITY VALIDATION
+    if (
+      data.availableDays !== undefined &&
+      !Array.isArray(data.availableDays)
+    ) {
+      errors.availableDays = "Available days must be a list";
     }
 
-    if (req.body.specialization !== undefined) {
-      trainer.specialization =
-        req.body.specialization;
+    if (
+      data.availableSlots !== undefined &&
+      !Array.isArray(data.availableSlots)
+    ) {
+      errors.availableSlots = "Available slots must be a list";
     }
 
-    if (req.body.bio !== undefined) {
-      trainer.bio = req.body.bio;
+    // RETURN FIELD-WISE ERRORS
+    if (Object.keys(errors).length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Please correct the highlighted fields",
+        errors,
+      });
     }
 
-    if (req.body.meetingLink !== undefined) {
-      trainer.meetingLink =
-        req.body.meetingLink;
-    }
+    // UPDATE BASIC DETAILS
+    const fields = [
+      "name",
+      "email",
+      "phone",
+      "address",
+      "age",
+      "gender",
+      "qualification",
+      "experience",
+      "specialization",
+      "bio",
+      "meetingLink",
+      "availableDays",
+      "availableSlots",
+      "height",
+      "weight",
+      "goal",
+      "profileImage",
+    ];
 
-    // AVAILABILITY
+    fields.forEach((field) => {
+      if (data[field] !== undefined) {
+        trainer[field] =
+          field === "name" || field === "email"
+            ? String(data[field]).trim()
+            : data[field];
+      }
+    });
 
-    if (req.body.availableDays !== undefined) {
-      trainer.availableDays =
-        req.body.availableDays;
-    }
-
-    if (req.body.availableSlots !== undefined) {
-      trainer.availableSlots =
-        req.body.availableSlots;
-    }
-
-    // FITNESS DETAILS
-
-    if (req.body.height !== undefined) {
-      trainer.height = req.body.height;
-    }
-
-    if (req.body.weight !== undefined) {
-      trainer.weight = req.body.weight;
-    }
-
-    if (req.body.goal !== undefined) {
-      trainer.goal = req.body.goal;
-    }
-
+    // SAVE AFTER VALIDATION
     await trainer.save();
 
-    const updatedTrainer =
-      await User.findById(
-        trainer._id
-      ).select("-password");
+    const updatedTrainer = await User.findById(
+      trainer._id
+    ).select("-password");
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Trainer profile updated successfully",
       trainer: updatedTrainer,
     });
   } catch (error) {
-    console.log("Update Trainer Error:", error);
+    // MONGOOSE VALIDATION ERRORS
+    if (error.name === "ValidationError") {
+      const errors = {};
 
-    res.status(500).json({
+      Object.values(error.errors).forEach((item) => {
+        errors[item.path] = item.message;
+      });
+
+      return res.status(400).json({
+        success: false,
+        message: "Please correct the highlighted fields",
+        errors,
+      });
+    }
+
+    // DUPLICATE EMAIL INDEX ERROR
+    if (error.code === 11000 && error.keyPattern?.email) {
+      return res.status(400).json({
+        success: false,
+        message: "This email is already registered",
+        errors: {
+          email: "This email is already registered",
+        },
+      });
+    }
+
+    return res.status(500).json({
       success: false,
-      message: error.message,
+      message: "Profile update failed",
     });
   }
 };
