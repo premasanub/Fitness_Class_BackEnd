@@ -4,6 +4,109 @@ import User from "../Models/user.js";
 import Booking from "../Models/booking.js";
 import Feedback from "../Models/feedback.js";
 
+
+// =====================================================
+// USER PROFILE VALIDATION
+// =====================================================
+
+const validateUserProfile = (data) => {
+  const errors = {};
+
+  // Full Name
+  if (data.name !== undefined) {
+    const name = String(data.name).trim();
+
+    if (!name) {
+      errors.name = "Full name is required";
+    } else if (
+      !/^[A-Za-z][A-Za-z .'-]{0,48}[A-Za-z.]$|^[A-Za-z]{2}$/.test(name)
+    ) {
+      errors.name =
+        "Name must contain letters and valid spaces only";
+    }
+  }
+
+  // Email
+  if (data.email !== undefined) {
+    const email = String(data.email).trim();
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      errors.email = "Enter a valid email address";
+    }
+  }
+
+  // Indian mobile number
+  if (data.phone !== undefined) {
+    const phone = String(data.phone).trim();
+
+    if (!/^[6-9]\d{9}$/.test(phone)) {
+      errors.phone =
+        "Enter a valid 10-digit mobile number";
+    }
+  }
+
+  // Age
+  if (data.age !== undefined && data.age !== "") {
+    const age = Number(data.age);
+
+    if (!Number.isInteger(age) || age < 18 || age > 100) {
+      errors.age = "Age must be between 18 and 100";
+    }
+  }
+
+  // Gender
+  if (
+    data.gender !== undefined &&
+    data.gender !== "" &&
+    !["Male", "Female", "Other"].includes(data.gender)
+  ) {
+    errors.gender = "Please select a valid gender";
+  }
+
+  // Height
+  if (data.height !== undefined && data.height !== "") {
+    const height = Number(data.height);
+
+    if (!Number.isFinite(height) || height < 50 || height > 300) {
+      errors.height = "Height must be between 50 and 300 cm";
+    }
+  }
+
+  // Weight
+  if (data.weight !== undefined && data.weight !== "") {
+    const weight = Number(data.weight);
+
+    if (!Number.isFinite(weight) || weight < 10 || weight > 500) {
+      errors.weight = "Weight must be between 10 and 500 kg";
+    }
+  }
+
+  // Fitness Goal
+  if (data.goal !== undefined && data.goal !== "") {
+    const validGoals = [
+      "Weight Loss",
+      "Weight Gain",
+      "Muscle Building",
+      "General Fitness",
+    ];
+
+    if (!validGoals.includes(data.goal)) {
+      errors.goal = "Please select a valid fitness goal";
+    }
+  }
+
+  // Address
+  if (data.address !== undefined) {
+    const address = String(data.address).trim();
+
+    if (address.length > 300) {
+      errors.address = "Address cannot exceed 300 characters";
+    }
+  }
+
+  return errors;
+};
+
 // =====================================================
 // GET LOGGED-IN USER PROFILE
 // =====================================================
@@ -34,29 +137,21 @@ export const getProfile = async (req, res) => {
 };
 
 // =====================================================
-// UPDATE LOGGED-IN USER PROFILE
+// UPDATE USER PROFILE WITH BACKEND VALIDATION
 // =====================================================
 
 export const updateProfile = async (req, res) => {
   try {
-    const {
-      name,
-      email,
-      phone,
-      age,
-      gender,
-      profileImage,
-      height,
-      weight,
-      goal,
-      address,
-      qualification,
-      specialization,
-      experience,
-      bio,
-      meetingLink,
-      availableDays,
-    } = req.body;
+    const errors = validateUserProfile(req.body);
+
+    // Return field-specific validation errors
+    if (Object.keys(errors).length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: "Please correct the errors",
+        errors,
+      });
+    }
 
     const user = await User.findById(req.user._id);
 
@@ -67,57 +162,92 @@ export const updateProfile = async (req, res) => {
       });
     }
 
-    // Don't use || because 0 can be a valid value
-    if (name !== undefined) user.name = name;
-    if (email !== undefined) user.email = email;
-    if (phone !== undefined) user.phone = phone;
-    if (age !== undefined) user.age = age;
+    // Check duplicate email
+    if (req.body.email !== undefined) {
+      const email = String(req.body.email).trim().toLowerCase();
+
+      const existingUser = await User.findOne({
+        email,
+        _id: { $ne: user._id },
+      });
+
+      if (existingUser) {
+        return res.status(409).json({
+          success: false,
+          message: "Email is already registered",
+          errors: {
+            email: "This email is already in use",
+          },
+        });
+      }
+
+      user.email = email;
+    }
+
+    // Update allowed fields only
+    const { name, phone, age, gender, height, weight, goal, address } =
+      req.body;
+
+    if (name !== undefined) user.name = name.trim();
+    if (phone !== undefined) user.phone = phone.trim();
+
+    if (age !== undefined) {
+      user.age = age === "" ? undefined : Number(age);
+    }
+
     if (gender !== undefined) user.gender = gender;
-    if (profileImage !== undefined)
-      user.profileImage = profileImage;
 
-    if (height !== undefined) user.height = height;
-    if (weight !== undefined) user.weight = weight;
+    if (height !== undefined) {
+      user.height = height === "" ? undefined : Number(height);
+    }
+
+    if (weight !== undefined) {
+      user.weight = weight === "" ? undefined : Number(weight);
+    }
+
     if (goal !== undefined) user.goal = goal;
-    if (address !== undefined) user.address = address;
-
-    if (qualification !== undefined)
-      user.qualification = qualification;
-
-    if (specialization !== undefined)
-      user.specialization = specialization;
-
-    if (experience !== undefined)
-      user.experience = experience;
-
-    if (bio !== undefined)
-      user.bio = bio;
-
-    if (meetingLink !== undefined)
-      user.meetingLink = meetingLink;
-
-    if (availableDays !== undefined)
-      user.availableDays = availableDays;
+    if (address !== undefined) user.address = address.trim();
 
     await user.save();
 
-    const updatedUser = await User.findById(user._id)
-      .select("-password");
+    const updatedUser = await User.findById(user._id).select("-password");
 
-    res.status(200).json({
+    return res.status(200).json({
       success: true,
       message: "Profile updated successfully",
       user: updatedUser,
     });
-
   } catch (error) {
-    res.status(500).json({
+    if (error.name === "ValidationError") {
+      const errors = {};
+
+      for (const key in error.errors) {
+        errors[key] = error.errors[key].message;
+      }
+
+      return res.status(400).json({
+        success: false,
+        message: "Please correct the errors",
+        errors,
+      });
+    }
+
+    if (error.code === 11000) {
+      return res.status(409).json({
+        success: false,
+        message: "Email is already registered",
+        errors: {
+          email: "This email is already in use",
+        },
+      });
+    }
+
+    return res.status(500).json({
       success: false,
-      message: error.message,
+      message: error.message || "Failed to update profile",
     });
   }
 };
-
 // =====================================================
 // USER DASHBOARD
 // =====================================================
